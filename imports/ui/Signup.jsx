@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router'
 import { Accounts } from 'meteor/accounts-base'
+import PropTypes from 'prop-types'
+import { compose } from 'react-komposer'
 
-export default class Signup extends Component {
+export class Signup extends Component {
     constructor(props) {
         super(props);
         this.onSubmit = this.onSubmit.bind(this);
@@ -15,7 +17,11 @@ export default class Signup extends Component {
         let email = this.refs.email.value.trim();
         let password = this.refs.password.value.trim();
 
-        Accounts.createUser({email, password}, (err) => {
+        if(password.length < 9) {
+            return this.setState({ error: 'Password must be more than 8 characters long' });
+        }
+
+        this.props.createUser({email, password}, (err) => {
             if(err) {
                 this.setState({
                     error: err.reason
@@ -46,3 +52,12 @@ export default class Signup extends Component {
         )
     }
 }
+
+export default compose((props, onData) => {
+    onData(null, { createUser: Accounts.createUser})
+})(Signup);
+
+Signup.propTypes = {
+    createUser: PropTypes.func.isRequired
+}
+
